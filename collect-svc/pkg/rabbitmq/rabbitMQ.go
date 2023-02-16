@@ -12,14 +12,14 @@ type RabbitMQ struct {
 	Queue amqp.Queue
 }
 
-func (r *RabbitMQ) NewRabbitMQ() *RabbitMQ {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+func NewRabbitMQService(connString string) (*RabbitMQ, error) {
+	conn, err := amqp.Dial(connString)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	ch, err := conn.Channel()
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	q, err := ch.QueueDeclare(
 		"hello",
@@ -30,41 +30,14 @@ func (r *RabbitMQ) NewRabbitMQ() *RabbitMQ {
 		nil,
 	)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	return &RabbitMQ{
 		Conn:  conn,
 		Ch:    ch,
 		Queue: q,
-	}
+	}, nil
 }
-
-// func NewRabbitMQ() *RabbitMQ {
-// 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	ch, err := conn.Channel()
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	q, err := ch.QueueDeclare(
-// 		"hello",
-// 		false,
-// 		false,
-// 		false,
-// 		false,
-// 		nil,
-// 	)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	return &RabbitMQ{
-// 		Conn:  conn,
-// 		Ch:    ch,
-// 		Queue: q,
-// 	}
-// }
 
 func (r *RabbitMQ) Publish(exchange, key, contentType string, body []byte) error {
 	return r.Ch.Publish(

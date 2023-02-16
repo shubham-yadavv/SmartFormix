@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/shubham/collect-svc/pkg/controllers"
 	"github.com/shubham/collect-svc/pkg/routes"
 )
 
@@ -23,7 +22,7 @@ func main() {
 	formRoutes.FormRoutes(r)
 
 	routes.TestRoutes(r)
-	controllers.ReceiveMessage()
+	// controllers.ReceiveMessage()
 
 	r.Run("localhost:3000")
 
