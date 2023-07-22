@@ -1,29 +1,26 @@
 package main
 
 import (
+	"log"
+
 	"github.com/gin-gonic/gin"
+
+	"github.com/shubham/collect-svc/pkg/config"
 	"github.com/shubham/collect-svc/pkg/routes"
 )
 
 func init() {
-	// config.LoadEnvVariables()
-	// config.ConnectDB()
-	// config.SyncDatabase()
-
+	config.LoadEnvVariables()
+	config.ConnectDB()
+	config.SyncDatabase()
 }
 
 func main() {
-	r := gin.Default()
 
-	// rabbitmq.NewRabbitMQ()
-	// Routes
+	router := gin.Default()
 
-	formRoutes := routes.FormRoutes{}
-	formRoutes.FormRoutes(r)
+	routes.TestRoutes(router)
 
-	routes.TestRoutes(r)
-	// controllers.ReceiveMessage()
-
-	r.Run("localhost:3000")
-
+	log.Println("HTTP server listening on port 3000...")
+	log.Fatal(router.Run(":3000"))
 }

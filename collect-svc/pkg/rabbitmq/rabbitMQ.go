@@ -1,8 +1,6 @@
 package rabbitmq
 
 import (
-	"log"
-
 	"github.com/streadway/amqp"
 )
 
@@ -12,8 +10,8 @@ type RabbitMQ struct {
 	Queue amqp.Queue
 }
 
-func NewRabbitMQService(connString string) (*RabbitMQ, error) {
-	conn, err := amqp.Dial(connString)
+func NewRabbitMQService() (*RabbitMQ, error) {
+	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +20,7 @@ func NewRabbitMQService(connString string) (*RabbitMQ, error) {
 		return nil, err
 	}
 	q, err := ch.QueueDeclare(
-		"hello",
+		"form",
 		false,
 		false,
 		false,
@@ -39,43 +37,62 @@ func NewRabbitMQService(connString string) (*RabbitMQ, error) {
 	}, nil
 }
 
-func (r *RabbitMQ) Publish(exchange, key, contentType string, body []byte) error {
-	return r.Ch.Publish(
+func (r *RabbitMQ) PublishMessage(exchange string, key string, body []byte) error {
+	err := r.Ch.Publish(
 		exchange,
 		key,
 		false,
 		false,
 		amqp.Publishing{
-			ContentType: contentType,
+			ContentType: "application/json",
 			Body:        body,
-		})
-}
-
-func (r *RabbitMQ) Consume(queue, consumer string, handlerFunc func([]byte) error) error {
-	msgs, err := r.Ch.Consume(
-		queue,
-		consumer,
-		true,
-		false,
-		false,
-		false,
-		nil,
+		},
 	)
 	if err != nil {
 		return err
 	}
-	forever := make(chan bool)
-	go func() {
-		for d := range msgs {
-			handlerFunc(d.Body)
-		}
-	}()
-	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
-	<-forever
 	return nil
 }
 
-func (r *RabbitMQ) Close() {
-	r.Ch.Close()
-	r.Conn.Close()
+func PublishMessage(body []byte) error {
+	rabbitMQ, err := NewRabbitMQService()
+	if err != nil {
+		return err
+	}
+	defer rabbitMQ.Conn.Close()
+	defer rabbitMQ.Ch.Close()
+	err = rabbitMQ.PublishMessage("", "form_responses", body)
+	if err != nil {
+		return err
+	}
+	return nil
 }
+
+// func (r *RabbitMQ) Consume(queue, consumer string, handlerFunc func([]byte) error) error {
+// 	msgs, err := r.Ch.Consume(
+// 		queue,
+// 		consumer,
+// 		true,
+// 		false,
+// 		false,
+// 		false,
+// 		nil,
+// 	)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	forever := make(chan bool)
+// 	go func() {
+// 		for d := range msgs {
+// 			handlerFunc(d.Body)
+// 		}
+// 	}()
+// 	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
+// 	<-forever
+// 	return nil
+// }
+
+// func (r *RabbitMQ) Close() {
+// 	r.Ch.Close()
+// 	r.Conn.Close()
+// }

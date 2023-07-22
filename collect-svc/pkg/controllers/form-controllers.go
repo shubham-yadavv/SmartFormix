@@ -1,36 +1,28 @@
 package controllers
 
 import (
-	"log"
-
 	"github.com/gin-gonic/gin"
 	"github.com/shubham/collect-svc/pkg/config"
 	"github.com/shubham/collect-svc/pkg/models"
-	"github.com/shubham/collect-svc/pkg/rabbitmq"
 )
 
 type FormController struct {
-	rmq *rabbitmq.RabbitMQ
-}
-
-func NewFormController(rmq *rabbitmq.RabbitMQ) *FormController {
-	return &FormController{rmq: rmq}
 }
 
 func (fc FormController) CreateForm(c *gin.Context) {
-	var form models.Form
-	c.BindJSON(&form)
-	config.DB.Create(&form)
+	// var form models.Form
+	// c.BindJSON(&form)
+	// config.DB.Create(&form)
 
-	err := fc.rmq.Publish("", "hello", "text/plain", []byte("Form created"))
-	if err != nil {
-		log.Println(err)
-	}
+	// err := fc.rmq.Publish("", "hello", "text/plain", []byte("Form created"))
+	// if err != nil {
+	// 	log.Println(err)
+	// }
 
-	c.JSON(200, gin.H{
-		"message": "Form created successfully",
-		"form":    form,
-	})
+	// c.JSON(200, gin.H{
+	// 	"message": "Form created successfully",
+	// 	"form":    form,
+	// })
 
 }
 
